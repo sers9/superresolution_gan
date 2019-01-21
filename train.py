@@ -101,10 +101,6 @@ for epoch in range(1, opt.max_epoch+1):
     d_l /= counter
     im_l /= counter
 
-    G_LOSSES.append(g_l)
-    D_LOSSES.append(d_l)
-    IM_LOSSES.append(im_l)
-
     print(f'epoch: {epoch:03d}/{opt.max_epoch}:\n'\
          +f'Gen Loss: {g_l:.4f} | Dis Loss: {d_l:.4f} | Image Loss: {im_l:.4f}'\
          +f'\tin {int(ep_end-ep_st)} sec')
