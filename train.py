@@ -43,9 +43,9 @@ normalize = transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 train_dataset = TinyImageNetDataSet(data_dir=opt.data_dir, 
 									im_list_file=opt.im_list_file, 
 									out_size=int(opt.org_im_size * opt.scale_factor),
-							        transform = transforms.Compose([transforms.ToTensor(), 
-				                                                    normalize # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L188
-				                                                    ]))
+									transform = transforms.Compose([transforms.ToTensor(), 
+																	normalize # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L188
+																	]))
 train_loader = DataLoader(dataset=train_dataset,  batch_size=opt.batch_size, shuffle=False, pin_memory=True)
 
 net_G = Generator(opt=opt).to(opt.device)
