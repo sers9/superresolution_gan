@@ -1,4 +1,4 @@
-# superresolution_gan
+# Superresolution using GAN
 Written in PyTorch 0.4.1
 
 Training of a typical GAN architecture for increasing the resolution of downsampled images. For this purpose, training split of the [Tiny-ImageNet dataset](https://tiny-imagenet.herokuapp.com/) is used. 
