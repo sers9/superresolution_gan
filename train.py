@@ -41,11 +41,11 @@ if not os.path.exists(opt.tmp_dir): os.mkdir(opt.tmp_dir)
 
 normalize = transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 train_dataset = TinyImageNetDataSet(data_dir=opt.data_dir, 
-									im_list_file=opt.im_list_file, 
-									out_size=int(opt.org_im_size * opt.scale_factor),
-									transform = transforms.Compose([transforms.ToTensor(), 
-																	normalize # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L188
-																	]))
+                                    im_list_file=opt.im_list_file, 
+                                    out_size=int(opt.org_im_size * opt.scale_factor),
+                                    transform = transforms.Compose([transforms.ToTensor(), 
+                                                                    normalize # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L188
+                                                                    ]))
 train_loader = DataLoader(dataset=train_dataset,  batch_size=opt.batch_size, shuffle=False, pin_memory=True)
 
 net_G = Generator(opt=opt).to(opt.device)
@@ -65,53 +65,53 @@ im_loss = nn.L1Loss().to(opt.device)
 
 for epoch in range(1, opt.max_epoch+1):
 
-	ep_st = time.time()
+    ep_st = time.time()
 
-	loader = tqdm(train_loader, total=len(train_loader))
-	d_l, g_l, im_l, counter = 0, 0, 0, 0
-	for itr, (image, image_down) in enumerate(loader):
-		image = image.to(opt.device)            
-		image_down = image_down.to(opt.device)
+    loader = tqdm(train_loader, total=len(train_loader))
+    d_l, g_l, im_l, counter = 0, 0, 0, 0
+    for itr, (image, image_down) in enumerate(loader):
+        image = image.to(opt.device)            
+        image_down = image_down.to(opt.device)
 
-		fake = net_G(image_down)
-		
-		net_D.zero_grad()
-		D_fake = net_D(fake.detach())
-		D_real = net_D(image)
+        fake = net_G(image_down)
+        
+        net_D.zero_grad()
+        D_fake = net_D(fake.detach())
+        D_real = net_D(image)
 
-		D_Loss = 0.5 * (adv_loss(D_real, torch.ones_like(D_real)) + adv_loss(D_fake, torch.zeros_like(D_fake)))
-		D_Loss.backward()
-		optim_D.step() 
+        D_Loss = 0.5 * (adv_loss(D_real, torch.ones_like(D_real)) + adv_loss(D_fake, torch.zeros_like(D_fake)))
+        D_Loss.backward()
+        optim_D.step() 
 
-		net_G.zero_grad()
-		GAN_G_loss = adv_loss(net_D(fake), torch.ones_like(D_fake))
-		Im_Loss = im_loss(fake, image)
-		G_Loss = GAN_G_loss + opt.lambda_im * Im_Loss
-		G_Loss.backward()
-		optim_G.step()
+        net_G.zero_grad()
+        GAN_G_loss = adv_loss(net_D(fake), torch.ones_like(D_fake))
+        Im_Loss = im_loss(fake, image)
+        G_Loss = GAN_G_loss + opt.lambda_im * Im_Loss
+        G_Loss.backward()
+        optim_G.step()
 
-		g_l += GAN_G_loss.item()
-		d_l += D_Loss.item()
-		im_l += Im_Loss.item()
-		counter += 1
+        g_l += GAN_G_loss.item()
+        d_l += D_Loss.item()
+        im_l += Im_Loss.item()
+        counter += 1
 
-	ep_end = time.time()
+    ep_end = time.time()
 
-	g_l /= counter
-	d_l /= counter
-	im_l /= counter
+    g_l /= counter
+    d_l /= counter
+    im_l /= counter
 
-	G_LOSSES.append(g_l)
-	D_LOSSES.append(d_l)
-	IM_LOSSES.append(im_l)
+    G_LOSSES.append(g_l)
+    D_LOSSES.append(d_l)
+    IM_LOSSES.append(im_l)
 
-	print(f'epoch: {epoch:03d}/{opt.max_epoch}:\n'\
-		 +f'Gen Loss: {g_l:.4f} | Dis Loss: {d_l:.4f} | Image Loss: {im_l:.4f}'\
-		 +f'\tin {int(ep_end-ep_st)} sec')
+    print(f'epoch: {epoch:03d}/{opt.max_epoch}:\n'\
+         +f'Gen Loss: {g_l:.4f} | Dis Loss: {d_l:.4f} | Image Loss: {im_l:.4f}'\
+         +f'\tin {int(ep_end-ep_st)} sec')
 
-	### Save example images
-	nrow = int(round(np.sqrt(opt.batch_size)))
-	save_image(image*0.5+0.5, f'{opt.tmp_dir}/{epoch}_image.png', nrow=nrow)
-	save_image(image_down*0.5+0.5, f'{opt.tmp_dir}/{epoch}_image_down.png', nrow=nrow)
-	save_image(fake*0.5+0.5, f'{opt.tmp_dir}/{epoch}_fake.png', nrow=nrow)
+    ### Save example images
+    nrow = int(round(np.sqrt(opt.batch_size)))
+    save_image(image*0.5+0.5, f'{opt.tmp_dir}/{epoch}_image.png', nrow=nrow)
+    save_image(image_down*0.5+0.5, f'{opt.tmp_dir}/{epoch}_image_down.png', nrow=nrow)
+    save_image(fake*0.5+0.5, f'{opt.tmp_dir}/{epoch}_fake.png', nrow=nrow)
 
